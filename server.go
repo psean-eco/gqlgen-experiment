@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	//database "github.com/psean/gql-go-gen/internal/pkg/db/mysql"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/psean/gql-go-gen/graph"
@@ -18,6 +20,7 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+	///database.InitDB()
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 

@@ -2,14 +2,15 @@
 
 package model
 
-type Device struct {
-	ID       string  `json:"id"`
-	Name     string  `json:"name"`
-	Location *string `json:"location"`
+type Player struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Position string `json:"position"`
 }
 
-type NewDevice struct {
-	ID       string  `json:"id"`
-	Name     string  `json:"name"`
-	Location *string `json:"location"`
+type Team struct {
+	ID       string    `json:"id"`
+	Name     string    `json:"name"`
+	Location *string   `json:"location"`
+	Players  []*Player `json:"players"`
 }

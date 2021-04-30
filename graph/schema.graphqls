@@ -2,23 +2,20 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Device {
+type Team {
   id: ID!
   name: String!
   location: String
+  players: [Player!]!
 }
 
 type Query {
-  devices: [Device!]!
+  teams: [Team!]!
+  players: [Player!]!
 }
 
-type Mutation {
-  createDevice(input: NewDevice!): Device!
-  deleteDevice(input: NewDevice!): Boolean!
-}
-
-input NewDevice {
+type Player {
   id: ID!
   name: String!
-  location: String
+  position: String!
 }

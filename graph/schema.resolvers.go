@@ -5,38 +5,27 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/psean/gql-go-gen/graph/generated"
 	"github.com/psean/gql-go-gen/graph/model"
+	utils "github.com/psean/gql-go-gen/graph/utils"
 )
 
-func (r *mutationResolver) CreateDevice(ctx context.Context, input model.NewDevice) (*model.Device, error) {
-	var device model.Device
-	device.ID = input.ID
-	device.Name = input.Name
-	devices = append(devices, &device)
-	return &device, nil
+func (r *queryResolver) Teams(ctx context.Context) ([]*model.Team, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) DeleteDevice(ctx context.Context, input model.NewDevice) (bool, error) {
-	for i, device := range devices {
-		if input.ID == device.ID {
-			devices = append(devices[:i], devices[i+1:]...)
-			return true, nil
-		}
+func (r *queryResolver) Players(ctx context.Context) ([]*model.Player, error) {
+	res, err := utils.GetPlayers()
+	if err != nil {
+		return nil, err
 	}
-	return false, nil
-}
 
-func (r *queryResolver) Devices(ctx context.Context) ([]*model.Device, error) {
-	return devices, nil
+	return res, nil
 }
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
