@@ -11,37 +11,36 @@ import (
 )
 
 type PlayerResponse struct {
-	id        string `json:"id"`
-	position  string `json:"position"`
-	firstName string `json:"first_name"`
+	ID        int    `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Position  string `json:"position"`
+}
+
+type TeamsResponse struct {
+	ID           int    `json:"id"`
+	Abbreviation string `json:"abbreviation"`
+	City         string `json:"city"`
+	Conference   string `json:"conference"`
+	Division     string `json:"division"`
+	FullName     string `json:"full_name"`
+	Name         string `json:"name"`
+}
+
+type MetaResponse struct {
+	TotalPages  int `json:"total_pages"`
+	CurrentPage int `json:"current_page"`
+	NextPage    int `json:"next_page"`
+	PerPage     int `json:"per_page"`
+	TotalCount  int `json:"total_count"`
 }
 
 type Response struct {
-	Data []struct {
-		ID           int         `json:"id"`
-		FirstName    string      `json:"first_name"`
-		HeightFeet   interface{} `json:"height_feet"`
-		HeightInches interface{} `json:"height_inches"`
-		LastName     string      `json:"last_name"`
-		Position     string      `json:"position"`
-		Team         struct {
-			ID           int    `json:"id"`
-			Abbreviation string `json:"abbreviation"`
-			City         string `json:"city"`
-			Conference   string `json:"conference"`
-			Division     string `json:"division"`
-			FullName     string `json:"full_name"`
-			Name         string `json:"name"`
-		} `json:"team"`
-		WeightPounds interface{} `json:"weight_pounds"`
-	} `json:"data"`
-	Meta struct {
-		TotalPages  int `json:"total_pages"`
-		CurrentPage int `json:"current_page"`
-		NextPage    int `json:"next_page"`
-		PerPage     int `json:"per_page"`
-		TotalCount  int `json:"total_count"`
-	} `json:"meta"`
+	Data []PlayerResponse `json:"data"`
+}
+
+type TeamResponse struct {
+	Data []TeamsResponse `json:"data"`
 }
 
 func GetPlayers() ([]*model.Player, error) {
@@ -84,5 +83,43 @@ func GetPlayers() ([]*model.Player, error) {
 	return players, err
 
 }
+func GetTeams() ([]*model.Team, error) {
+	response, err := http.Get("https://www.balldontlie.io/api/v1/teams")
+	var lo = "home"
+	team := model.Team{
+		ID:       "1234",
+		Name:     "test Device1",
+		Location: &lo,
+	}
+	var defaultTeams []*model.Team
+	defaultTeams = append(defaultTeams, &team)
+	if err != nil {
+		log.Fatal(err)
+		return defaultTeams, err
+	}
 
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Fatal(err)
+		return defaultTeams, err
+	}
+	if err != nil {
+		log.Fatal(err)
+		return defaultTeams, err
+	}
+	responseObject := new(TeamResponse)
+	json.Unmarshal(responseData, &responseObject)
 
+	var teams []*model.Team
+
+	for _, team := range responseObject.Data {
+		var NewTeam = model.Team{
+			ID:   strconv.Itoa(team.ID),
+			Name: team.Name,
+		}
+		teams = append(teams, &NewTeam)
+	}
+
+	return teams, err
+
+}

@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/psean/gql-go-gen/graph/generated"
 	"github.com/psean/gql-go-gen/graph/model"
@@ -13,7 +12,12 @@ import (
 )
 
 func (r *queryResolver) Teams(ctx context.Context) ([]*model.Team, error) {
-	panic(fmt.Errorf("not implemented"))
+	res, err := utils.GetTeams()
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (r *queryResolver) Players(ctx context.Context) ([]*model.Player, error) {
