@@ -133,9 +133,11 @@ func GetPlayersForTeam(team model.Team) ([]*model.Player, error) {
 }
 func convertToTeam(team TeamsResponse) model.Team {
 	newTeam := model.Team{
-		ID:       strconv.Itoa(team.ID),
-		Name:     team.Name,
-		Location: &team.City,
+		ID:           strconv.Itoa(team.ID),
+		Name:         team.Name,
+		Location:     &team.City,
+		Abbreviation: team.Abbreviation,
+		Conference:   team.Conference,
 	}
 	return newTeam
 }

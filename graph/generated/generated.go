@@ -55,10 +55,12 @@ type ComplexityRoot struct {
 	}
 
 	Team struct {
-		ID       func(childComplexity int) int
-		Location func(childComplexity int) int
-		Name     func(childComplexity int) int
-		Players  func(childComplexity int) int
+		Abbreviation func(childComplexity int) int
+		Conference   func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Location     func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Players      func(childComplexity int) int
 	}
 }
 
@@ -119,6 +121,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Teams(childComplexity), true
+
+	case "Team.abbreviation":
+		if e.complexity.Team.Abbreviation == nil {
+			break
+		}
+
+		return e.complexity.Team.Abbreviation(childComplexity), true
+
+	case "Team.conference":
+		if e.complexity.Team.Conference == nil {
+			break
+		}
+
+		return e.complexity.Team.Conference(childComplexity), true
 
 	case "Team.id":
 		if e.complexity.Team.ID == nil {
@@ -207,6 +223,8 @@ type Team {
   name: String!
   location: String
   players: [Player!]!
+  conference: String!
+  abbreviation: String!
 }
 
 type Query {
@@ -661,6 +679,76 @@ func (ec *executionContext) _Team_players(ctx context.Context, field graphql.Col
 	res := resTmp.([]*model.Player)
 	fc.Result = res
 	return ec.marshalNPlayer2ᚕᚖgithubᚗcomᚋpseanᚋgqlᚑgoᚑgenᚋgraphᚋmodelᚐPlayerᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Team_conference(ctx context.Context, field graphql.CollectedField, obj *model.Team) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Team",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Conference, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Team_abbreviation(ctx context.Context, field graphql.CollectedField, obj *model.Team) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Team",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Abbreviation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -1890,6 +1978,16 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 				}
 				return res
 			})
+		case "conference":
+			out.Values[i] = ec._Team_conference(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "abbreviation":
+			out.Values[i] = ec._Team_abbreviation(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

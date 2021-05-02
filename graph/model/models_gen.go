@@ -9,8 +9,10 @@ type Player struct {
 }
 
 type Team struct {
-	ID       string    `json:"id"`
-	Name     string    `json:"name"`
-	Location *string   `json:"location"`
-	Players  []*Player `json:"players"`
+	ID           string    `json:"id"`
+	Name         string    `json:"name"`
+	Location     *string   `json:"location"`
+	Players      []*Player `json:"players"`
+	Conference   string    `json:"conference"`
+	Abbreviation string    `json:"abbreviation"`
 }

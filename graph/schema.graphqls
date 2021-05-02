@@ -7,6 +7,8 @@ type Team {
   name: String!
   location: String
   players: [Player!]!
+  conference: String!
+  abbreviation: String!
 }
 
 type Query {

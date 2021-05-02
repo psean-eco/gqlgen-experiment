@@ -36,7 +36,6 @@ func (r *teamResolver) Players(ctx context.Context, obj *model.Team) ([]*model.P
 		return players, err
 	}
 	return players, nil
-
 }
 
 // Query returns generated.QueryResolver implementation.
