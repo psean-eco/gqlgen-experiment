@@ -45,31 +45,23 @@ type TeamResponse struct {
 
 func GetPlayers() ([]*model.Player, error) {
 	response, err := http.Get("https://www.balldontlie.io/api/v1/players")
-	player := model.Player{
-		ID:       "1234",
-		Name:     "test Device1",
-		Position: "C",
-	}
-	var defaultPlayers []*model.Player
-	defaultPlayers = append(defaultPlayers, &player)
+	var players []*model.Player
 	if err != nil {
 		log.Fatal(err)
-		return defaultPlayers, err
+		return players, err
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)
-		return defaultPlayers, err
+		return players, err
 	}
 	if err != nil {
 		log.Fatal(err)
-		return defaultPlayers, err
+		return players, err
 	}
 	responseObject := new(Response)
 	json.Unmarshal(responseData, &responseObject)
-
-	var players []*model.Player
 
 	for _, player := range responseObject.Data {
 		var NewPlayer = model.Player{
@@ -85,41 +77,36 @@ func GetPlayers() ([]*model.Player, error) {
 }
 func GetTeams() ([]*model.Team, error) {
 	response, err := http.Get("https://www.balldontlie.io/api/v1/teams")
-	var lo = "home"
-	team := model.Team{
-		ID:       "1234",
-		Name:     "test Device1",
-		Location: &lo,
-	}
-	var defaultTeams []*model.Team
-	defaultTeams = append(defaultTeams, &team)
+	var teams []*model.Team
 	if err != nil {
 		log.Fatal(err)
-		return defaultTeams, err
+		return teams, err
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Fatal(err)
-		return defaultTeams, err
+		return teams, err
 	}
 	if err != nil {
 		log.Fatal(err)
-		return defaultTeams, err
+		return teams, err
 	}
 	responseObject := new(TeamResponse)
 	json.Unmarshal(responseData, &responseObject)
 
-	var teams []*model.Team
-
 	for _, team := range responseObject.Data {
-		var NewTeam = model.Team{
-			ID:   strconv.Itoa(team.ID),
-			Name: team.Name,
-		}
-		teams = append(teams, &NewTeam)
+		convertedTeam := convertToTeam(team)
+		teams = append(teams, &convertedTeam)
 	}
 
 	return teams, err
 
+}
+func convertToTeam(team TeamsResponse) model.Team {
+	NewTeam := model.Team{
+		ID:   strconv.Itoa(team.ID),
+		Name: team.Name,
+	}
+	return NewTeam
 }
