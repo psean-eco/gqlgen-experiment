@@ -36,6 +36,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Query() QueryResolver
+	Team() TeamResolver
 }
 
 type DirectiveRoot struct {
@@ -64,6 +65,9 @@ type ComplexityRoot struct {
 type QueryResolver interface {
 	Teams(ctx context.Context) ([]*model.Team, error)
 	Players(ctx context.Context) ([]*model.Player, error)
+}
+type TeamResolver interface {
+	Players(ctx context.Context, obj *model.Team) ([]*model.Player, error)
 }
 
 type executableSchema struct {
@@ -635,14 +639,14 @@ func (ec *executionContext) _Team_players(ctx context.Context, field graphql.Col
 		Object:     "Team",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Players, nil
+		return ec.resolvers.Team().Players(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1863,20 +1867,29 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 		case "id":
 			out.Values[i] = ec._Team_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._Team_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "location":
 			out.Values[i] = ec._Team_location(ctx, field, obj)
 		case "players":
-			out.Values[i] = ec._Team_players(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Team_players(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

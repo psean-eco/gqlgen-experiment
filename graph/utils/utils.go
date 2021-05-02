@@ -11,10 +11,11 @@ import (
 )
 
 type PlayerResponse struct {
-	ID        int    `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Position  string `json:"position"`
+	ID        int           `json:"id"`
+	FirstName string        `json:"first_name"`
+	LastName  string        `json:"last_name"`
+	Position  string        `json:"position"`
+	Team      TeamsResponse `json:"team"`
 }
 
 type TeamsResponse struct {
@@ -64,12 +65,8 @@ func GetPlayers() ([]*model.Player, error) {
 	json.Unmarshal(responseData, &responseObject)
 
 	for _, player := range responseObject.Data {
-		var NewPlayer = model.Player{
-			ID:       strconv.Itoa(player.ID),
-			Name:     player.LastName,
-			Position: player.Position,
-		}
-		players = append(players, &NewPlayer)
+		newPlayer := convertToPlayer(player)
+		players = append(players, &newPlayer)
 	}
 
 	return players, err
@@ -103,10 +100,51 @@ func GetTeams() ([]*model.Team, error) {
 	return teams, err
 
 }
-func convertToTeam(team TeamsResponse) model.Team {
-	NewTeam := model.Team{
-		ID:   strconv.Itoa(team.ID),
-		Name: team.Name,
+
+func GetPlayersForTeam(team model.Team) ([]*model.Player, error) {
+	response, err := http.Get("https://www.balldontlie.io/api/v1/players")
+	var players []*model.Player
+	if err != nil {
+		log.Fatal(err)
+		return players, err
 	}
-	return NewTeam
+
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Fatal(err)
+		return players, err
+	}
+	if err != nil {
+		log.Fatal(err)
+		return players, err
+	}
+	responseObject := new(Response)
+	json.Unmarshal(responseData, &responseObject)
+
+	for _, player := range responseObject.Data {
+		if strconv.Itoa(player.Team.ID) == team.ID {
+			newPlayer := convertToPlayer(player)
+			players = append(players, &newPlayer)
+		}
+	}
+
+	return players, err
+
+}
+func convertToTeam(team TeamsResponse) model.Team {
+	newTeam := model.Team{
+		ID:       strconv.Itoa(team.ID),
+		Name:     team.Name,
+		Location: &team.City,
+	}
+	return newTeam
+}
+
+func convertToPlayer(player PlayerResponse) model.Player {
+	newPlayer := model.Player{
+		ID:       strconv.Itoa(player.ID),
+		Name:     player.FirstName + " " + player.LastName,
+		Position: player.Position,
+	}
+	return newPlayer
 }
